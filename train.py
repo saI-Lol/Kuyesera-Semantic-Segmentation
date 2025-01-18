@@ -12,7 +12,7 @@ if __name__ == "__main__":
     model = SeResNext50_Unet_Loc().cuda()
     with rasterio.open(args.image_path) as src:
         img_array = src.read()
-    image_tensor = torch.from_numpy(img_array).cuda()
+    image_tensor = torch.from_numpy(img_array).float().cuda()
     image_tensor = image_tensor.unsqueeze(0)
     output = model(image_tensor)
     print(output)
