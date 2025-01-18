@@ -27,7 +27,6 @@ def wce_loss(y_true, y_pred, gamma_1=0.8, gamma_0=0.2):
     # Clip predictions to avoid log(0) and ensure numerical stability
     epsilon = 1e-3
     y_pred = torch.clamp(y_pred, epsilon, 1 - epsilon)
-    print("wce", torch.min(y_pred), torch.max(y_pred))
     
     # Compute weighted cross-entropy loss
     wce_loss = - (gamma_1 * y_true * torch.log(y_pred) + 
@@ -55,7 +54,6 @@ def focal_loss(y_true, y_pred, alpha=0.5, gamma=2):
     # Clip predictions to avoid log(0) and ensure numerical stability
     epsilon = 1e-3
     y_pred = torch.clamp(y_pred, epsilon, 1 - epsilon)
-    print("focal", torch.min(y_pred), torch.max(y_pred))
     
     # Calculate the focal loss
     focal_loss = - (
