@@ -15,9 +15,9 @@ class ConvRelu(nn.Module):
         return self.layer(x)
 
 class SeResNext50_Unet_Loc(nn.Module):
-    def __init__(self, pretrained='imagenet', **kwargs):
+    def __init__(self, num_classes=1, pretrained='imagenet', **kwargs):
         super(SeResNext50_Unet_Loc, self).__init__()
-        
+        self.num_classes = num_classes
         encoder_filters = [64, 256, 512, 1024, 2048]
         decoder_filters = np.asarray([64, 96, 128, 256, 512]) // 2
 
@@ -32,7 +32,7 @@ class SeResNext50_Unet_Loc(nn.Module):
         self.conv10 = ConvRelu(decoder_filters[-4], decoder_filters[-5])
         
         
-        self.res = nn.Conv2d(decoder_filters[-5], 1, 1, stride=1, padding=0)
+        self.res = nn.Conv2d(decoder_filters[-5], self.num_classes, 1, stride=1, padding=0)
 
         self._initialize_weights()
 

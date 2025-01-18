@@ -106,7 +106,7 @@ def main(args):
     val_data_loader = DataLoader(val_train, batch_size=val_batch_size, num_workers=workers, pin_memory=False)
     test_data_loader = DataLoader(data_test, batch_size=val_batch_size, num_workers=workers, pin_memory=False)
 
-    model = SeResNext50_Unet_Loc().cuda()
+    model = SeResNext50_Unet_Loc(num_classes=len(damage_types)).cuda()
     params = model.parameters()
     optimizer = AdamW(params, lr=0.00015, weight_decay=1e-6)
 
