@@ -4,6 +4,16 @@ from torch import nn
 import torch.nn.functional as F
 from senet import se_resnext50_32x4d
 
+class ConvRelu(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=3):
+        super(ConvRelu, self).__init__()
+        self.layer = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, padding=1),
+            nn.ReLU(inplace=True)
+        )
+    def forward(self, x):
+        return self.layer(x)
+
 class SeResNext50_Unet_Loc(nn.Module):
     def __init__(self, pretrained='imagenet', **kwargs):
         super(SeResNext50_Unet_Loc, self).__init__()
