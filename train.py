@@ -8,6 +8,9 @@ from tqdm import tqdm
 from utils import mae_loss, AverageMeter, TrainDataset, ValDataset
 import os
 from torch.utils.data import DataLoader
+import random
+import numpy as np
+
 
 def train_epoch(model, train_data_loader, optimizer, epoch):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
