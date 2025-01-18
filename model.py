@@ -75,11 +75,7 @@ class SeResNext50_Unet_Loc(nn.Module):
                 ], 1))
 
         dec10 = self.conv10(F.interpolate(dec9, scale_factor=2))
-
-        # logits = self.res(dec10)
-        # output = torch.sigmoid(logits)
-
-        # return output
+        
         return self.res(dec10)
 
 
