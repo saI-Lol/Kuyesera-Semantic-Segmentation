@@ -1,6 +1,6 @@
 from model import SeResNext50_Unet_Loc
 import argparse
-from torchvision.io import read_image
+import rasterio
 
 
 if __name__ == "__main__":
@@ -9,6 +9,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     model = SeResNext50_Unet_Loc().cuda()
-    image_tensor = read_image(args.image_path).unsqueeze(0).cuda()
+    with rasterio.open(args.image_path) as src:
+        img_array = src.read()
+    image_tensor = torch.from_numpy(img_array).cuda()
+    return img_array
     output = model(image_tensor)
     print(output)
