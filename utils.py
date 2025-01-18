@@ -25,8 +25,10 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
-def mae_loss(input, target):
-    pass
+def mae_loss(output, target):
+    print(torch.min(output), torch.max(output))
+    print(torch.min(target), torch.max(target))
+
     
 
 def mask_for_polygon(poly, im_size=(1024, 1024)):
