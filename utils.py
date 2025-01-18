@@ -158,6 +158,7 @@ def calculate_metrics(y_true, y_pred, epsilon=1e-7):
     return {"precision": precision, "recall": recall, "f1_score": f1_score, "iou": iou}
 
 def calculate_loss(y_pred, y_true):
+    y_pred = F.sigmoid(y_pred)
     wce = wce_loss(y_true, y_pred)
     focal = focal_loss(y_true, y_pred)
     dice = dice_loss(y_true, y_pred)
