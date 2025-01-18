@@ -23,10 +23,11 @@ def train_epoch(model, train_data_loader, optimizer, epoch):
     for i, batch in enumerate(iterator):
         imgs = batch["img"].cuda(non_blocking=True)
         msks = batch["msk"].cuda(non_blocking=True)
-        print(imgs.shape, msks.shape)
+        
 
         with autocast(device_type=device):
             out = model(imgs)
+            print(out.shape, msks.shape)
             loss_dict = mae_loss(out, msks)
             loss = loss_dict['all']
 
@@ -109,7 +110,7 @@ def main(args):
     val_data_loader = DataLoader(val_train, batch_size=val_batch_size, num_workers=workers, pin_memory=False)
     test_data_loader = DataLoader(data_test, batch_size=val_batch_size, num_workers=workers, pin_memory=False)
 
-    model = SeResNext50_Unet_Loc(num_classes=len(damage_types)).cuda()
+    model = SeResNext50_Unet_Loc().cuda()
     params = model.parameters()
     optimizer = AdamW(params, lr=0.00015, weight_decay=1e-6)
 
