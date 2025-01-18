@@ -26,8 +26,9 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 def mae_loss(output, target):
-    print(torch.min(output), torch.max(output))
-    print(torch.min(target), torch.max(target))
+    print(output)
+    # print(torch.min(output), torch.max(output))
+    # print(torch.min(target), torch.max(target))
 
     
 
