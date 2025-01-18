@@ -124,7 +124,7 @@ def main(args):
 
     torch.cuda.empty_cache()
     for epoch in range(epochs):
-        train_epoch(model, train_data_loader, optimizer, epoch, args.loss, all_loss_functions)
+        train_epoch(model, train_data_loader, optimizer, epoch, args.loss)
         val_epoch(model, val_data_loader, epoch, args.loss, all_loss_functions, all_metrics)
         torch.cuda.empty_cache()
     evaluate(model, test_data_loader, all_loss_functions, all_metrics)
