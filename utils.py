@@ -5,6 +5,9 @@ import torch
 from torch.utils.data import Dataset
 import cv2
 import numpy as np
+from shapely import wkt
+import json
+
 
 
 class AverageMeter(object):
@@ -78,7 +81,6 @@ class TrainDataset(Dataset):
 class ValDataset(Dataset):
     def __init__(self, val_data_paths, damage_types):
         super().__init__()
-        print(val_data_paths)
         image_ids = []
         for val_data_path in val_data_paths:
             val_data_path = Path(val_data_path)
