@@ -25,7 +25,7 @@ def wce_loss(y_true, y_pred, gamma_1=0.8, gamma_0=0.2):
         Weighted Cross-Entropy loss as a scalar tensor.
     """
     # Clip predictions to avoid log(0) and ensure numerical stability
-    epsilon = 1e-3
+    epsilon = 1e-5
     y_pred = torch.clamp(y_pred, epsilon, 1 - epsilon)
     
     # Compute weighted cross-entropy loss
@@ -52,7 +52,7 @@ def focal_loss(y_true, y_pred, alpha=0.5, gamma=2):
         Focal loss as a scalar tensor.
     """
     # Clip predictions to avoid log(0) and ensure numerical stability
-    epsilon = 1e-3
+    epsilon = 1e-5
     y_pred = torch.clamp(y_pred, epsilon, 1 - epsilon)
     
     # Calculate the focal loss
