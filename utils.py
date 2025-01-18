@@ -78,10 +78,11 @@ class TrainDataset(Dataset):
 class ValDataset(Dataset):
     def __init__(self, val_data_paths, damage_types):
         super().__init__()
+        print(val_data_paths)
         image_ids = []
         for val_data_path in val_data_paths:
             val_data_path = Path(val_data_path)
-            for filename in os.listdir(str(val_data_path / "images")):
+            for filename in os.listdir(val_data_path / "images"):
                 image_ids.append(val_data_path / "images" / f"{'_'.join(filename.split('_')[:-2])}_post_disaster.tif")
         image_ids = sorted(set(image_ids))
         self.image_ids = list(image_ids)
