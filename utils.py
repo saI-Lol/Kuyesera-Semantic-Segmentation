@@ -76,6 +76,7 @@ class TrainDataset(Dataset):
         image_id = self.image_ids[idx]
         with rasterio.open(image_id) as f:
             img = f.read()
+        img = img / 255.0
         img_tensor = torch.from_numpy(img).float()
         msk = get_damage_mask(self.damage_types, image_id)
         item = {'img': img_tensor, 'msk': msk, 'fn': str(image_id)}
