@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
-from .senet import se_resnext50_32x4d
+from senet import se_resnext50_32x4d
 
 class SeResNext50_Unet_Loc(nn.Module):
     def __init__(self, pretrained='imagenet', **kwargs):
