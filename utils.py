@@ -49,6 +49,7 @@ def get_damage_mask(damage_types, image_file_path):
         poly = wkt.loads(item['wkt'])
         _msk = mask_for_polygon(poly)
         msk_damage[_msk > 0] = damage_dict.get(subtype, 0)
+    msk_damage = msk_damage[np.newaxis, :, :]
     return msk_damage
 
 
