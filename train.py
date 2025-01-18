@@ -1,6 +1,7 @@
 from model import SeResNext50_Unet_Loc
 import argparse
 import rasterio
+import torch
 
 
 if __name__ == "__main__":
