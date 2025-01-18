@@ -1,4 +1,4 @@
-from .model import SeResNext50_Unet_Loc
+from model import SeResNext50_Unet_Loc
 import argparse
 from torchvision.io import read_image
 
