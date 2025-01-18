@@ -54,8 +54,8 @@ class TrainDataset(Dataset):
         image_ids = []
         for train_data_path in train_data_paths:
             train_data_path = Path(train_data_path)
-            for filename in os.listdir(train_data_path/ "images"):
-                image_ids.append(train_data_path/ "images" / f"{'_'.join(filename.split('_')[:-2])}_post_disaster.tif")
+            for filename in os.listdir(train_data_path / "images"):
+                image_ids.append(train_data_path / "images" / f"{'_'.join(filename.split('_')[:-2])}_post_disaster.tif")
         image_ids = sorted(set(image_ids))
         self.image_ids = list(image_ids)
         self.damage_types = damage_types
@@ -81,8 +81,8 @@ class ValDataset(Dataset):
         image_ids = []
         for val_data_path in val_data_paths:
             val_data_path = Path(val_data_path)
-            for filename in os.listdir(val_data_path/ "images"):
-                image_ids.append(val_data_path/ "images" / f"{'_'.join(filename.split('_')[:-2])}_post_disaster.tif")
+            for filename in os.listdir(val_data_path / "images"):
+                image_ids.append(val_data_path / "images" / f"{'_'.join(filename.split('_')[:-2])}_post_disaster.tif")
         image_ids = sorted(set(image_ids))
         self.image_ids = list(image_ids)
         self.damage_types = damage_types
