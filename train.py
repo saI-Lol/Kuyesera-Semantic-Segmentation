@@ -15,4 +15,5 @@ if __name__ == "__main__":
     image_tensor = torch.from_numpy(img_array).float().cuda()
     image_tensor = image_tensor.unsqueeze(0)
     output = model(image_tensor)
+    print(output.size())
     print(output)
