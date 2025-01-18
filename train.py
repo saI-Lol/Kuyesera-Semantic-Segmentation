@@ -28,6 +28,7 @@ def train_epoch(model, train_data_loader, optimizer, epoch, loss_function):
         with autocast(device_type=device):
             out = model(imgs)
             loss_dict = calculate_loss(out, msks)
+            print(loss_dict)
             loss = loss_dict[loss_function]
 
         losses.update(loss.item(), imgs.size(0))
