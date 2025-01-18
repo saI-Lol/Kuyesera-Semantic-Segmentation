@@ -26,6 +26,7 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 def mae_loss(input, target):
+    pass
     
 
 def mask_for_polygon(poly, im_size=(1024, 1024)):
