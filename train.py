@@ -38,7 +38,7 @@ def train_epoch(model, train_data_loader, optimizer, epoch, loss_function):
         scaler.step(optimizer)
         scaler.update()
 
-def val_epoch(model, val_data_loader, epoch, loss_function, all_loss_functions, all_metrics):
+def val_epoch(model, val_data_loader, epoch, loss_function, all_loss_functions, all_metrics, best_loss):
     model = model.eval()
     losses = {loss: AverageMeter() for loss in all_loss_functions}
     metrics = {metric: AverageMeter() for metric in all_metrics}
@@ -125,7 +125,7 @@ def main(args):
     torch.cuda.empty_cache()
     for epoch in range(epochs):
         train_epoch(model, train_data_loader, optimizer, epoch, args.loss)
-        val_epoch(model, val_data_loader, epoch, args.loss, all_loss_functions, all_metrics)
+        val_epoch(model, val_data_loader, epoch, args.loss, all_loss_functions, all_metrics, best_loss)
         torch.cuda.empty_cache()
     evaluate(model, test_data_loader, all_loss_functions, all_metrics)
 
