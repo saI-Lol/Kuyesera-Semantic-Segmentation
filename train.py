@@ -141,6 +141,6 @@ if __name__ == "__main__":
     parser.add_argument('--train-data-paths', nargs='+', required=True)
     parser.add_argument('--val-data-paths', nargs='+', required=True)
     parser.add_argument('--test-data-paths', nargs='+', required=True)
-    parser.add_argument("--loss", type=str, default="WCE")
+    parser.add_argument("--loss", type=str, default="combo_loss")
     args = parser.parse_args()
     main(args)
