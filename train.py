@@ -5,14 +5,14 @@ import torch
 from adamw import AdamW
 from torch.amp import autocast, GradScaler
 from tqdm import tqdm
-from utils import mae_loss, AverageMeter, TrainDataset, ValDataset
+from utils import AverageMeter, TrainDataset, ValDataset, calculate_loss, calculate_metrics
 import os
 from torch.utils.data import DataLoader
 import random
 import numpy as np
 
 
-def train_epoch(model, train_data_loader, optimizer, epoch):
+def train_epoch(model, train_data_loader, optimizer, epoch, loss_function):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     losses = AverageMeter()
     scaler = GradScaler()
@@ -27,21 +27,21 @@ def train_epoch(model, train_data_loader, optimizer, epoch):
 
         with autocast(device_type=device):
             out = model(imgs)
-            print(out.shape, msks.shape)
-            loss_dict = mae_loss(out, msks)
-            loss = loss_dict['all']
+            loss_dict = calculate_loss(out, msks)
+            loss = loss_dict[loss_function]
 
         losses.update(loss.item(), imgs.size(0))
-        iterator.set_description(f"Epoch: {epoch+1}, Loss: {losses.avg:.4f}")
+        iterator.set_description(f"Epoch: {epoch+1}, Loss({loss_function}): {losses.avg:.4f}")
 
         optimizer.zero_grad()
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
 
-def val_epoch(model, val_data_loader, epoch):
+def val_epoch(model, val_data_loader, epoch, loss_function, all_loss_functions, all_metrics):
     model = model.eval()
-    losses = AverageMeter()
+    losses = {loss: AverageMeter() for loss in all_loss_functions}
+    metrics = {metric: AverageMeter() for metric in all_metrics}
 
     with torch.no_grad():
         for i, batch in enumerate(tqdm(val_data_loader)):
@@ -49,27 +49,31 @@ def val_epoch(model, val_data_loader, epoch):
             imgs = batch["img"].cuda(non_blocking=True)
             
             out = model(imgs)
-            loss_dict = mae_loss(out, msks)
-            loss = loss_dict['all']
-            losses.update(loss.item(), imgs.size(0))
+            loss_dict = calculate_loss(out, msks)
+            for loss in all_loss_functions:
+                losses[loss].update(loss_dict[loss].item(), imgs.size(0))
+            metric_dict = calculate_metrics(out, msks)
+            for metric in all_metrics:
+                metrics[metric].update(metric_dict[metric].item(), imgs.size(0))
 
-    print(f"Epoch: {epoch+1}, Val Mae: {losses.avg:.4f}")
-    if best_mae is None:
-        best_mae = losses.avg
+    print(f"Val Losses: {', '.join([f'{loss}: {losses[loss].avg:.4f}' for loss in all_loss_functions])}")
+    print(f"Val Metrics: {', '.join([f'{metric}: {metrics[metric].avg:.4f}' for metric in all_metrics])}")
+    if best_loss is None:
+        best_loss = losses[loss_function].avg
     else:
-        if losses.avg < best_mae:
-            best_mae = losses.avg
+        if losses[loss_function].avg < best_loss:
+            best_loss = losses[loss_function].avg
             torch.save({
                 'epoch': epoch + 1,
                 'state_dict': model.state_dict(),
-                'best_mae': best_mae,
+                'best_loss': best_loss,
             }, os.path.join(models_folder, snapshot_name + '_best'))
 
 
-def evaluate(model, test_data_loader, damage_types):
+def evaluate(model, test_data_loader, all_loss_functions, all_metrics):
     model = model.eval()
-    losses = AverageMeter()
-    damage_losses = {damage_type: AverageMeter() for damage_type in damage_types}
+    losses = {loss: AverageMeter() for loss in all_loss_functions}
+    metrics = {metric: AverageMeter() for metric in all_metrics}
 
     with torch.no_grad():
         for i, batch in enumerate(tqdm(test_data_loader)):
@@ -77,15 +81,15 @@ def evaluate(model, test_data_loader, damage_types):
             imgs = batch["img"].cuda(non_blocking=True)
             
             out = model(imgs)
-            loss_dict = mae_loss(out, msks)
-            loss = loss_dict['all']
-            losses.update(loss.item(), imgs.size(0))
-            for damage_type in damage_types:
-                damage_losses[damage_type].update(loss_dict[damage_type].item(), imgs.size(0))
+            loss_dict = calculate_loss(out, msks)
+            for loss in all_loss_functions:
+                losses[loss].update(loss_dict[loss].item(), imgs.size(0))
+            metric_dict = calculate_metrics(out, msks)
+            for metric in all_metrics:
+                metrics[metric].update(metric_dict[metric].item(), imgs.size(0))
 
-    print(f"Test Mae all: {losses.avg:.4f}")
-    for damage_type in damage_types:
-        print(f"Test Mae {damage_type}: {damage_losses[damage_type].avg:.4f}")
+    print(f"Test Losses: {', '.join([f'{loss}: {losses[loss].avg:.4f}' for loss in all_loss_functions])}")
+    print(f"Test Metrics: {', '.join([f'{metric}: {metrics[metric].avg:.4f}' for metric in all_metrics])}")
 
 
 def main(args):
@@ -114,14 +118,16 @@ def main(args):
     params = model.parameters()
     optimizer = AdamW(params, lr=0.00015, weight_decay=1e-6)
 
-    best_mae = None
+    best_loss = None
+    all_loss_functions = ["wce_loss", "focal_loss", "dice_loss", "combo_loss", "tversky_loss"]
+    all_metrics = ["iou", "f1_score", "precision", "recall"]
 
     torch.cuda.empty_cache()
     for epoch in range(epochs):
-        train_epoch(model, train_data_loader, optimizer, epoch)
-        val_epoch(model, val_data_loader, epoch)
+        train_epoch(model, train_data_loader, optimizer, epoch, args.loss, all_loss_functions)
+        val_epoch(model, val_data_loader, epoch, args.loss, all_loss_functions, all_metrics)
         torch.cuda.empty_cache()
-    evaluate(model, test_data_loader, damage_types)
+    evaluate(model, test_data_loader, all_loss_functions, all_metrics)
 
 
 if __name__ == "__main__":
@@ -135,5 +141,6 @@ if __name__ == "__main__":
     parser.add_argument('--train-data-paths', nargs='+', required=True)
     parser.add_argument('--val-data-paths', nargs='+', required=True)
     parser.add_argument('--test-data-paths', nargs='+', required=True)
+    parser.add_argument("--loss", type=str, default="WCE")
     args = parser.parse_args()
     main(args)
